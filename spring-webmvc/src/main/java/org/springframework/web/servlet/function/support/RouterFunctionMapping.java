@@ -125,7 +125,12 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 
 
 	@Override
+<<<<<<< Updated upstream
 	public void afterPropertiesSet() {
+=======
+	public void afterPropertiesSet() throws Exception {
+		// 初始化
+>>>>>>> Stashed changes
 		if (this.routerFunction == null) {
 			initRouterFunctions();
 		}
@@ -147,6 +152,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	 * application context.
 	 */
 	private void initRouterFunctions() {
+		// 获取spring 容器的RouterFunction
 		List<RouterFunction<?>> routerFunctions = obtainApplicationContext()
 				.getBeanProvider(RouterFunction.class)
 				.orderedStream()

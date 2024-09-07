@@ -71,6 +71,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	@Autowired
 	void setConfigurers(ObjectProvider<AsyncConfigurer> configurers) {
 		Supplier<AsyncConfigurer> configurer = SingletonSupplier.of(() -> {
+			// AsyncConfigurer集合
 			List<AsyncConfigurer> candidates = configurers.stream().toList();
 			if (CollectionUtils.isEmpty(candidates)) {
 				return null;
@@ -78,7 +79,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 			if (candidates.size() > 1) {
 				throw new IllegalStateException("Only one AsyncConfigurer may exist");
 			}
-			return candidates.get(0);
+			return candidates.get(0);// 一堆则选第一个
 		});
 		this.executor = adapt(configurer, AsyncConfigurer::getAsyncExecutor);
 		this.exceptionHandler = adapt(configurer, AsyncConfigurer::getAsyncUncaughtExceptionHandler);

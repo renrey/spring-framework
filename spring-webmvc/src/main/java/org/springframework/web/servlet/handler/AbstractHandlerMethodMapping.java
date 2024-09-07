@@ -209,6 +209,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Override
 	public void afterPropertiesSet() {
+		// 执行 springmvc初始化方法 -》扫描spring bean
 		initHandlerMethods();
 	}
 
@@ -219,8 +220,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #handlerMethodsInitialized
 	 */
 	protected void initHandlerMethods() {
+		// 扫描每个spring bean
 		for (String beanName : getCandidateBeanNames()) {
 			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
+				// 判断是否Controller注解，有则注入handler方法到注册表
 				processCandidateBean(beanName);
 			}
 		}
@@ -253,6 +256,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected void processCandidateBean(String beanName) {
 		Class<?> beanType = null;
 		try {
+			// 获取bean
 			beanType = obtainApplicationContext().getType(beanName);
 		}
 		catch (Throwable ex) {
@@ -261,6 +265,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				logger.trace("Could not resolve type for bean '" + beanName + "'", ex);
 			}
 		}
+		// 判断是否Controller注解
 		if (beanType != null && isHandler(beanType)) {
 			detectHandlerMethods(beanName);
 		}
@@ -277,6 +282,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		if (handlerType != null) {
 			Class<?> userType = ClassUtils.getUserClass(handlerType);
+			// 获取每个方法
 			Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
 					(MethodIntrospector.MetadataLookup<T>) method -> {
 						try {
@@ -293,8 +299,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			else if (mappingsLogger.isDebugEnabled()) {
 				mappingsLogger.debug(formatMappings(userType, methods));
 			}
+			// 每个方法注册
 			methods.forEach((method, mapping) -> {
 				Method invocableMethod = AopUtils.selectInvocableMethod(method, userType);
+
+				// 注册到当前对象的注册表，参数：注册handler、方法、映射判断
 				registerHandlerMethod(handler, invocableMethod, mapping);
 			});
 		}
@@ -631,8 +640,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 
 		public void register(T mapping, Object handler, Method method) {
-			this.readWriteLock.writeLock().lock();
+			this.readWriteLock.writeLock().lock();// 读写锁
 			try {
+				// 封装 HandlerMethod ：包含bean对象、执行方法的对象
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
 				validateMethodMapping(handlerMethod, mapping);
 
@@ -657,6 +667,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					this.corsLookup.put(handlerMethod, corsConfig);
 				}
 
+				// 放入MappingRegistration
 				this.registry.put(mapping,
 						new MappingRegistration<>(mapping, handlerMethod, directPaths, name, corsConfig != null));
 			}
@@ -764,8 +775,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 			Assert.notNull(mapping, "Mapping must not be null");
 			Assert.notNull(handlerMethod, "HandlerMethod must not be null");
-			this.mapping = mapping;
-			this.handlerMethod = handlerMethod;
+			this.mapping = mapping;// 映射规则
+			this.handlerMethod = handlerMethod;// 执行命令对象--- 命令模式
 			this.directPaths = (directPaths != null ? directPaths : Collections.emptySet());
 			this.mappingName = mappingName;
 			this.corsConfig = corsConfig;

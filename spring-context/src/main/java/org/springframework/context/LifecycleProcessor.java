@@ -24,6 +24,7 @@ package org.springframework.context;
  * @since 3.0
  */
 public interface LifecycleProcessor extends Lifecycle {
+	// 看着用来触发 一些组件的 启动、关闭
 
 	/**
 	 * Notification of context refresh, e.g. for auto-starting components.

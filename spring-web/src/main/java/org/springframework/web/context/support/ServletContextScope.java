@@ -69,6 +69,7 @@ public class ServletContextScope implements Scope, DisposableBean {
 		Object scopedObject = this.servletContext.getAttribute(name);
 		if (scopedObject == null) {
 			scopedObject = objectFactory.getObject();
+			// 直接存在ServletContext上
 			this.servletContext.setAttribute(name, scopedObject);
 		}
 		return scopedObject;

@@ -48,7 +48,7 @@ public class ProxyTransactionManagementConfiguration extends AbstractTransaction
 
 		BeanFactoryTransactionAttributeSourceAdvisor advisor = new BeanFactoryTransactionAttributeSourceAdvisor();
 		advisor.setTransactionAttributeSource(transactionAttributeSource);
-		advisor.setAdvice(transactionInterceptor);
+		advisor.setAdvice(transactionInterceptor);// 设置执行用的拦截器
 		if (this.enableTx != null) {
 			advisor.setOrder(this.enableTx.<Integer>getNumber("order"));
 		}

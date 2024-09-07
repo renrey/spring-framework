@@ -39,10 +39,13 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
+		// 保存在TL中的 ServletRequestAttributes
 		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
 		Object scopedObject = attributes.getAttribute(name, getScope());
 		if (scopedObject == null) {
-			scopedObject = objectFactory.getObject();
+			scopedObject = objectFactory.getObject();// 创建对象
+
+			// 新对象保存到tl对应http对象（HttpSession、HttpRequest） 的属性
 			attributes.setAttribute(name, scopedObject, getScope());
 			// Retrieve object again, registering it for implicit session attribute updates.
 			// As a bonus, we also allow for potential decoration at the getAttribute level.

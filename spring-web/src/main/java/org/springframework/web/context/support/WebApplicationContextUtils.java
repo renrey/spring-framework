@@ -183,10 +183,13 @@ public abstract class WebApplicationContextUtils {
 	public static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory,
 			@Nullable ServletContext sc) {
 
+		// request、session作用域:都是保存到tl的http对应对象中
 		beanFactory.registerScope(WebApplicationContext.SCOPE_REQUEST, new RequestScope());
 		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope());
+
+		// servlet作用域
 		if (sc != null) {
-			ServletContextScope appScope = new ServletContextScope(sc);
+			ServletContextScope appScope = new ServletContextScope(sc);// scope封装了ServletContext对象-》直接直接存在ServletContext上
 			beanFactory.registerScope(WebApplicationContext.SCOPE_APPLICATION, appScope);
 			// Register as ServletContext attribute, for ContextCleanupListener to detect it.
 			sc.setAttribute(ServletContextScope.class.getName(), appScope);

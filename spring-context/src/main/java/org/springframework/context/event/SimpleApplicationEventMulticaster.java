@@ -141,8 +141,10 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	@Override
 	public void multicastEvent(ApplicationEvent event, @Nullable ResolvableType eventType) {
 		ResolvableType type = (eventType != null ? eventType : ResolvableType.forInstance(event));
-		Executor executor = getTaskExecutor();
+		Executor executor = getTaskExecutor();// 异步
+		// 获取支持当前事件的ApplicationListener
 		for (ApplicationListener<?> listener : getApplicationListeners(event, type)) {
+			// 如果有定义线程池，看listener是否支持异步，支持就异步执行
 			if (executor != null && listener.supportsAsyncExecution()) {
 				try {
 					executor.execute(() -> invokeListener(listener, event));
@@ -153,6 +155,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 				}
 			}
 			else {
+				// 直接同步执行
 				invokeListener(listener, event);
 			}
 		}

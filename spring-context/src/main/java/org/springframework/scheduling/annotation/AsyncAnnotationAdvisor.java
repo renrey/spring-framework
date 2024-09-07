@@ -113,7 +113,10 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 			// If Jakarta Concurrent API not present, simply ignore.
 		}
 
+		// 操作
 		this.advice = buildAdvice(executor, exceptionHandler);
+
+		// 判断 -> 查看是否包含注解
 		this.pointcut = buildPointcut(asyncAnnotationTypes);
 	}
 

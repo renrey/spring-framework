@@ -91,6 +91,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 			return bean;
 		}
 
+		// 这个代表已经是aop代理对象
 		if (bean instanceof Advised advised) {
 			if (!advised.isFrozen() && isEligible(AopUtils.getTargetClass(bean))) {
 				// Add our local Advisor to the existing proxy's Advisor chain.
@@ -110,7 +111,9 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 			}
 		}
 
+		// 判断当前bean是否可用这个aop扩展 -》使用当前advisor判断是否bean可增强
 		if (isEligible(bean, beanName)) {
+			// 下面aop相关操作
 			ProxyFactory proxyFactory = prepareProxyFactory(bean, beanName);
 			if (!proxyFactory.isProxyTargetClass()) {
 				evaluateProxyInterfaces(bean.getClass(), proxyFactory);
@@ -124,6 +127,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 					classLoader != bean.getClass().getClassLoader()) {
 				classLoader = smartClassLoader.getOriginalClassLoader();
 			}
+			// 返回aop代理对象
 			return proxyFactory.getProxy(classLoader);
 		}
 
@@ -165,6 +169,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 		if (this.advisor == null) {
 			return false;
 		}
+		// 使用advisor判断
 		eligible = AopUtils.canApply(this.advisor, targetClass);
 		this.eligibleBeans.put(targetClass, eligible);
 		return eligible;

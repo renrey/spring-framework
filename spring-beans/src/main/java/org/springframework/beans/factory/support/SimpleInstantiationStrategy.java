@@ -104,13 +104,15 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 		if (!bd.hasMethodOverrides()) {
 			Constructor<?> constructorToUse;
 			synchronized (bd.constructorArgumentLock) {
+				// 使用的构造方法
 				constructorToUse = (Constructor<?>) bd.resolvedConstructorOrFactoryMethod;
-				if (constructorToUse == null) {
+				if (constructorToUse == null) {// 大概是spring无配置使用的构造方法
 					Class<?> clazz = bd.getBeanClass();
 					if (clazz.isInterface()) {
 						throw new BeanInstantiationException(clazz, "Specified class is an interface");
 					}
 					try {
+						// 选择默认构造方法
 						constructorToUse = clazz.getDeclaredConstructor();
 						bd.resolvedConstructorOrFactoryMethod = constructorToUse;
 					}
@@ -119,6 +121,8 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					}
 				}
 			}
+
+			// 通过反射进行 的， （无参数）构造方法创建对象
 			return BeanUtils.instantiateClass(constructorToUse);
 		}
 		else {
@@ -167,7 +171,12 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 		return instantiateWithFactoryMethod(factoryMethod, () -> {
 			try {
+<<<<<<< Updated upstream
 				ReflectionUtils.makeAccessible(factoryMethod);
+=======
+				currentlyInvokedFactoryMethod.set(factoryMethod);
+				// 通过反射调用factoryMethod
+>>>>>>> Stashed changes
 				Object result = factoryMethod.invoke(factoryBean, args);
 				if (result == null) {
 					result = new NullBean();

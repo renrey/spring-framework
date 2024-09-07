@@ -122,6 +122,7 @@ public abstract class RequestContextHolder {
 	 * @see jakarta.faces.context.FacesContext#getCurrentInstance()
 	 */
 	public static RequestAttributes currentRequestAttributes() throws IllegalStateException {
+		// 从tl获取
 		RequestAttributes attributes = getRequestAttributes();
 		if (attributes == null) {
 			if (jsfPresent) {

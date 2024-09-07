@@ -169,24 +169,30 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 */
 	@Nullable
 	protected AsyncTaskExecutor determineAsyncExecutor(Method method) {
+		// 获取当前方法的线程池
 		AsyncTaskExecutor executor = this.executors.get(method);
 		if (executor == null) {
 			Executor targetExecutor;
+			// 就是async注解指定的值
 			String qualifier = getExecutorQualifier(method);
 			if (this.embeddedValueResolver != null && StringUtils.hasLength(qualifier)) {
 				qualifier = this.embeddedValueResolver.resolveStringValue(qualifier);
 			}
+			// 查找指定的线程池，在容器中
 			if (StringUtils.hasLength(qualifier)) {
 				targetExecutor = findQualifiedExecutor(this.beanFactory, qualifier);
 			}
 			else {
+				// 没指定则使用默认
 				targetExecutor = this.defaultExecutor.get();
 			}
+			// 无就不执行
 			if (targetExecutor == null) {
 				return null;
 			}
 			executor = (targetExecutor instanceof AsyncTaskExecutor asyncTaskExecutor ?
 					asyncTaskExecutor : new TaskExecutorAdapter(targetExecutor));
+			// 缓存方法使用的线程池
 			this.executors.put(method, executor);
 		}
 		return executor;

@@ -240,12 +240,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
 			throws BeansException {
 
+		// 1. 名字处理（Factorybean的名字处理（&前缀）、别名映射）
 		String beanName = transformedBeanName(name);
 		Object beanInstance;
 
+		// 2. 单例bean尝试 从缓存中获取 -》
 		// Eagerly check singleton cache for manually registered singletons.
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
+			// 这里缓存中已有这个name的bean
+
 			if (logger.isTraceEnabled()) {
 				if (isSingletonCurrentlyInCreation(beanName)) {
 					logger.trace("Returning eagerly cached instance of singleton bean '" + beanName +
@@ -255,10 +259,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					logger.trace("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
+			// 尝试使用FactoryBean 方式 创建bean -》这个beanName获取到的对象可能只是FactoryBean
 			beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		}
 
 		else {
+			// 缓存中不存在这个name的bean -》需要新建
+
 			// Fail if we're already creating this bean instance:
 			// We're assumably within a circular reference.
 			if (isPrototypeCurrentlyInCreation(beanName)) {
@@ -331,8 +338,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Create bean instance.
 				if (mbd.isSingleton()) {
+					// 单例对象bean 创建 ！！！
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
+							// 创建对象
 							return createBean(beanName, mbd, args);
 						}
 						catch (BeansException ex) {
@@ -347,10 +356,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 
 				else if (mbd.isPrototype()) {
+					// 实际:单例缓存都没有，每次直接到这里
+					// 多例模式创建 bean-》每次使用都新建
+
 					// It's a prototype -> create a new instance.
 					Object prototypeInstance = null;
 					try {
 						beforePrototypeCreation(beanName);
+						// 创建原型对象
 						prototypeInstance = createBean(beanName, mbd, args);
 					}
 					finally {
@@ -360,15 +373,19 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 
 				else {
+					// 作用域
 					String scopeName = mbd.getScope();
 					if (!StringUtils.hasLength(scopeName)) {
 						throw new IllegalStateException("No scope name defined for bean '" + beanName + "'");
 					}
+
+					// 专门的scope
 					Scope scope = this.scopes.get(scopeName);
 					if (scope == null) {
 						throw new IllegalStateException("No Scope registered for scope name '" + scopeName + "'");
 					}
 					try {
+						// 从scope获取，不存在创建
 						Object scopedInstance = scope.get(beanName, () -> {
 							beforePrototypeCreation(beanName);
 							try {
@@ -1273,6 +1290,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return the transformed bean name
 	 */
 	protected String transformedBeanName(String name) {
+		// 1. Factorybean的名字处理（&前缀）
+		// 2. 映射相关
 		return canonicalName(BeanFactoryUtils.transformedBeanName(name));
 	}
 
@@ -1842,15 +1861,20 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// Now we have the bean instance, which may be a normal bean or a FactoryBean.
 		// If it's a FactoryBean, we use it to create a bean instance, unless the
 		// caller actually wants a reference to the factory.
+
+		// 正常bean，返回
 		if (!(beanInstance instanceof FactoryBean<?> factoryBean)) {
 			return beanInstance;
 		}
+		// 下面都是FactoryBean ，不用spring bean传统方式创建
 
 		Object object = null;
+		// 有mbd参数，代表当前bean用FactoryBean的方式
 		if (mbd != null) {
 			mbd.isFactoryBean = true;
 		}
 		else {
+			// 1. 先从 已通过FactoryBean的方式创建的bean 缓存中获取
 			object = getCachedObjectForFactoryBean(beanName);
 		}
 		if (object == null) {
@@ -1860,6 +1884,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				mbd = getMergedLocalBeanDefinition(beanName);
 			}
 			boolean synthetic = (mbd != null && mbd.isSynthetic());
+			// 2. 执行getObject返回bean目标对象 -》注意这里没创建beanWrapper
 			object = getObjectFromFactoryBean(factoryBean, beanName, !synthetic);
 		}
 		return object;

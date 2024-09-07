@@ -278,6 +278,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
+		// 指定容量使用LinkedBlockingQueue，没指定SynchronousQueue
 		BlockingQueue<Runnable> queue = createQueue(this.queueCapacity);
 
 		ThreadPoolExecutor executor = new ThreadPoolExecutor(

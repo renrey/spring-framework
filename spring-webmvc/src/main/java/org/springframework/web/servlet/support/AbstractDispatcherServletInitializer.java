@@ -62,6 +62,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
 		super.onStartup(servletContext);
+		// 生成DispatcherServlet
 		registerDispatcherServlet(servletContext);
 	}
 
@@ -80,13 +81,16 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 		String servletName = getServletName();
 		Assert.state(StringUtils.hasLength(servletName), "getServletName() must not return null or empty");
 
+		// spring集成servlet
 		WebApplicationContext servletAppContext = createServletApplicationContext();
 		Assert.state(servletAppContext != null, "createServletApplicationContext() must not return null");
 
+		// SPRING MVC ：DispatcherServlet
 		FrameworkServlet dispatcherServlet = createDispatcherServlet(servletAppContext);
 		Assert.state(dispatcherServlet != null, "createDispatcherServlet(WebApplicationContext) must not return null");
 		dispatcherServlet.setContextInitializers(getServletApplicationContextInitializers());
 
+		// 加入DispatcherServlet到servletContext
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
 		if (registration == null) {
 			throw new IllegalStateException("Failed to register servlet with name '" + servletName + "'. " +

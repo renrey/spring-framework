@@ -25,6 +25,7 @@ import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
+ * 用来适配HttpRequestHandler
  * Adapter to use the plain {@link org.springframework.web.HttpRequestHandler}
  * interface with the generic {@link org.springframework.web.servlet.DispatcherServlet}.
  * Supports handlers that implement the {@link LastModified} interface.

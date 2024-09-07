@@ -1013,9 +1013,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		// Iterate over a copy to allow for init methods which in turn register new bean definitions.
 		// While this may not be part of the regular factory bootstrap, it does otherwise work fine.
-		List<String> beanNames = new ArrayList<>(this.beanDefinitionNames);
+		List<String> beanNames = new ArrayList<>(this.beanDefinitionNames);// 已加载 bean定义的名字集合
 
+		// 1.
 		// Trigger initialization of all non-lazy singleton beans...
+<<<<<<< Updated upstream
 		List<CompletableFuture<?>> futures = new ArrayList<>();
 		this.preInstantiationThread.set(PreInstantiation.MAIN);
 		try {
@@ -1038,6 +1040,24 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			catch (CompletionException ex) {
 				ReflectionUtils.rethrowRuntimeException(ex.getCause());
+=======
+		for (String beanName : beanNames) {
+			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+				// FACTORY_BEAN方式
+				if (isFactoryBean(beanName)) {
+					// 1）获取对应FACTORY_BEAN
+					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
+					if (bean instanceof SmartFactoryBean<?> smartFactoryBean && smartFactoryBean.isEagerInit()) {
+						// 2) 通过FACTORY_BEAN（getObject方法） 创建bean
+						getBean(beanName);
+					}
+				}
+				else {
+					// 传统方法
+					getBean(beanName);
+				}
+>>>>>>> Stashed changes
 			}
 		}
 
@@ -1498,6 +1518,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return new Jsr330Factory().createDependencyProvider(descriptor, requestingBeanName);
 		}
 		else if (descriptor.supportsLazyResolution()) {
+			// 延迟构造
 			Object result = getAutowireCandidateResolver().getLazyResolutionProxyIfNecessary(
 					descriptor, requestingBeanName);
 			if (result != null) {
@@ -1514,6 +1535,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		InjectionPoint previousInjectionPoint = ConstructorResolver.setCurrentInjectionPoint(descriptor);
 		try {
+			// @Autowired注入
 			// Step 1: pre-resolved shortcut for single bean match, e.g. from @Autowired
 			Object shortcut = descriptor.resolveShortcut(this);
 			if (shortcut != null) {
@@ -1522,6 +1544,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 			Class<?> type = descriptor.getDependencyType();
 
+			// @Value注解的
 			// Step 2: pre-defined value or expression, e.g. from @Value
 			Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
 			if (value != null) {
@@ -1543,6 +1566,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 
+<<<<<<< Updated upstream
 			// Step 3: shortcut for declared dependency name or qualifier-suggested name matching target bean name
 			if (descriptor.usesStandardBeanLookup()) {
 				String dependencyName = descriptor.getDependencyName();
@@ -1565,6 +1589,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 
 			// Step 4a: multiple beans as stream / array / standard collection / plain map
+=======
+			// 集合
+			// Step 3a: multiple beans as stream / array / standard collection / plain map
+>>>>>>> Stashed changes
 			Object multipleBeans = resolveMultipleBeans(descriptor, beanName, autowiredBeanNames, typeConverter);
 			if (multipleBeans != null) {
 				return multipleBeans;

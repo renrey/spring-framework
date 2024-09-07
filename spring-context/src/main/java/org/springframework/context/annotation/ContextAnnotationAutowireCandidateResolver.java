@@ -101,6 +101,7 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 			@SuppressWarnings("NullAway")
 			public Object getTarget() {
 				Set<String> autowiredBeanNames = (beanName != null ? new LinkedHashSet<>(1) : null);
+				// 1. 找这个bean
 				Object target = dlbf.doResolveDependency(descriptor, beanName, autowiredBeanNames, null);
 				if (target == null) {
 					Class<?> type = getTargetClass();

@@ -279,14 +279,24 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	}
 
 	private void startBeans(boolean autoStartupOnly) {
+		// 获取Lifecycle类的bean
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
 		Map<Integer, LifecycleGroup> phases = new TreeMap<>();
 
+		// 每个Lifecycle执行
 		lifecycleBeans.forEach((beanName, bean) -> {
 			if (!autoStartupOnly || isAutoStartupCandidate(beanName, bean)) {
+<<<<<<< Updated upstream
 				int startupPhase = getPhase(bean);
 				phases.computeIfAbsent(startupPhase,
 						phase -> new LifecycleGroup(phase, determineTimeout(phase), lifecycleBeans, autoStartupOnly)
+=======
+				int phase = getPhase(bean);
+				// 生成
+				phases.computeIfAbsent(
+						phase,
+						p -> new LifecycleGroup(phase, this.timeoutPerShutdownPhase, lifecycleBeans, autoStartupOnly)
+>>>>>>> Stashed changes
 				).add(beanName, bean);
 			}
 		});

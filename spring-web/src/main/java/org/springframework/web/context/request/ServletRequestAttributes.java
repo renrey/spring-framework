@@ -172,6 +172,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	@Override
 	public void setAttribute(String name, Object value, int scope) {
+		// 请求的
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
 				throw new IllegalStateException(
@@ -180,6 +181,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			this.request.setAttribute(name, value);
 		}
 		else {
+			// 其他保存到session
 			HttpSession session = obtainSession();
 			this.sessionAttributesToUpdate.remove(name);
 			session.setAttribute(name, value);
